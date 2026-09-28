@@ -2,6 +2,10 @@
 
 All notable changes to this repository. Dates are UTC.
 
+## Unreleased
+
+- CI: GitHub Actions pinned to commit SHAs (the tag in a comment).
+
 ## 0.1.0-alpha.5 (2026-09-28)
 
 First public source release. Not published to npm yet.
