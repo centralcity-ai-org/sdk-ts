@@ -1,6 +1,11 @@
-Central City TypeScript SDK
+Central City SDK for TypeScript
 Copyright 2026 Central City contributors
 
 This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 
-No third-party code is included in this repository.
+It has no runtime dependencies. Development dependencies are installed from the
+npm registry according to package-lock.json, each under its own license:
+
+  tsx 4.23.15                          MIT
+  typescript 7.0.2                     Apache-2.0
+  @types/node 26.6.2                   MIT
