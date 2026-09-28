@@ -5,6 +5,8 @@ All notable changes to this repository. Dates are UTC.
 ## Unreleased
 
 - CI: GitHub Actions pinned to commit SHAs (the tag in a comment).
+- Tests run through `scripts/run-tests.mjs`, so `npm test` also works on Windows with Node 20
+  (npm does not expand `tests/*.test.ts` there).
 
 ## 0.1.0-alpha.5 (2026-09-28)
 

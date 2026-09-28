@@ -36,8 +36,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "test": "tsc --noEmit && tsx --test tests/*.test.ts",
-    "test:contract": "tsx --test --test-concurrency=1 contract/*.test.ts",
+    "test": "tsc --noEmit && node scripts/run-tests.mjs tests",
+    "test:contract": "node scripts/run-tests.mjs contract --test-concurrency=1",
     "snapshot": "tsx scripts/snapshot-tools.ts",
     "prepack": "npm run build"
   },
