@@ -38,12 +38,11 @@
     "typecheck": "tsc --noEmit",
     "test": "tsc --noEmit && node scripts/run-tests.mjs tests",
     "test:contract": "node scripts/run-tests.mjs contract --test-concurrency=1",
-    "snapshot": "tsx scripts/snapshot-tools.ts",
+    "snapshot": "npx --yes tsx scripts/snapshot-tools.ts",
     "prepare": "npm run build"
   },
   "devDependencies": {
     "@types/node": "26.6.2",
-    "tsx": "4.23.15",
     "typescript": "7.0.2"
   }
 }

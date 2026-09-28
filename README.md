@@ -74,6 +74,25 @@ Results and failures are delivered with the same lease and never re-executed; an
 or timeout is reported as `runtime-unavailable` or `execution-timeout`; a paused workspace backs
 off from 30 s to 5 min; rate limits wait for `Retry-After`.
 
+## Installing
+
+The package is not on npm yet. Install it from GitHub:
+
+```sh
+npm install github:centralcity-ai/sdk-ts
+```
+
+npm builds `dist/` during that install: it runs the package's `prepare` script, which compiles
+the TypeScript with `tsc` (the only tool installed for it; there is no other install-time
+download). So the build does not run, and the package has **no `dist/`**, when:
+
+- you install with `--ignore-scripts` (or `ignore-scripts=true` in `.npmrc`);
+- your package manager blocks dependency build scripts. pnpm 10 does this by default: allow it
+  with `pnpm approve-builds`, or list `@centralcity/sdk` under `pnpm.onlyBuiltDependencies` in
+  your `package.json`. Yarn Berry needs `enableScripts` for it.
+
+Built release tarballs will follow, so that no build step runs on install.
+
 ## Errors and retries
 
 - Branch on `error.kind` (`auth`, `scope`, `forbidden`, `not_found`, `conflict`, `paused`,
@@ -135,6 +154,11 @@ npm install
 npm test                 # typecheck plus unit tests (no network)
 CC_SDK_LIVE=1 npm test   # also a read-only smoke test against https://centralcity.ai/mcp/open
 ```
+
+The unit tests are compiled with `tsc` and run with `node --test`; no TypeScript loader is
+installed with the package. The contract tests and `npm run snapshot` import TypeScript directly
+and need [tsx](https://github.com/privatenumber/tsx): `npm install --no-save tsx`, or they use the
+one in your app checkout (`CC_APP_DIR`).
 
 ### Contract tests against a local app build
 

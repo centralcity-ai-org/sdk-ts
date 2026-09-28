@@ -4,6 +4,11 @@ All notable changes to this repository. Dates are UTC.
 
 ## Unreleased
 
+- No TypeScript loader in the install path: `tsx` is no longer a dependency; unit tests compile
+  with `tsc` and run on `node --test`. The contract tests and `npm run snapshot` use tsx from
+  `npm install --no-save tsx` or the app checkout.
+- README: installing from GitHub, and what happens with `--ignore-scripts` or package managers
+  that block build scripts.
 - `npm install github:centralcity-ai/sdk-ts#<tag>` now builds `dist/` (the build runs on
   `prepare`, which npm runs for git dependencies).
 - Timeouts and cancellation no longer use `AbortSignal.any()`/`AbortSignal.timeout()`: on

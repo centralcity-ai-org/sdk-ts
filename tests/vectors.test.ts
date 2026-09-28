@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { test } from 'node:test';
 import { runtimeHeaders, runtimeSignature } from '../src/runtime/index.js';
 import { signWebhook, verifyWebhook } from '../src/webhooks.js';
 
 const load = (name: string) =>
-  JSON.parse(readFileSync(new URL(`./vectors/${name}`, import.meta.url), 'utf8'));
+  JSON.parse(readFileSync(join(process.cwd(), 'tests', 'vectors', name), 'utf8'));
 
 test('runtime HMAC matches the reference implementation byte for byte', async () => {
   const { vectors } = load('runtime-hmac.json');
