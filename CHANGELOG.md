@@ -4,6 +4,8 @@ All notable changes to this repository. Dates are UTC.
 
 ## Unreleased
 
+- `npm install github:centralcity-ai/sdk-ts#<tag>` now builds `dist/` (the build runs on
+  `prepare`, which npm runs for git dependencies).
 - Timeouts and cancellation no longer use `AbortSignal.any()`/`AbortSignal.timeout()`: on
   Node 20 those composite signals can be garbage-collected while pending, so an abort (for
   example the runtime executor deadline) might never fire.

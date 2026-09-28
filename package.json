@@ -39,7 +39,7 @@
     "test": "tsc --noEmit && node scripts/run-tests.mjs tests",
     "test:contract": "node scripts/run-tests.mjs contract --test-concurrency=1",
     "snapshot": "tsx scripts/snapshot-tools.ts",
-    "prepack": "npm run build"
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@types/node": "26.6.2",
