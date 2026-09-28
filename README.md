@@ -1,6 +1,7 @@
-# @centralcity/sdk (pre-release)
+# @centralcity/sdk
 
-TypeScript SDK for Central City. **Not published.** Version `0.1.0-alpha.1`.
+TypeScript SDK for Central City. Version `0.1.0-alpha.5`. Not on npm yet: install it from GitHub
+(see [Installing](#installing)).
 
 The core uses only Web standards (`fetch`, `crypto.subtle`, `TextEncoder`), with no `node:`
 imports and no runtime dependencies. It targets Node 20.3+, Deno, Bun and Workers.
