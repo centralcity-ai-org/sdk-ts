@@ -8,6 +8,7 @@ import {
 } from './errors.js';
 import { utf8 } from './internal/bytes.js';
 import { cleanServerText } from './secret.js';
+import { linkedSignal } from './internal/signals.js';
 import { parseSse } from './sse.js';
 
 /** Protocol revisions. Modern needs no initialize; legacy does. */
@@ -159,8 +160,9 @@ export class HttpMcpTransport implements McpTransport {
     const authorization = await this.#options.auth?.header();
     if (authorization) headers.authorization = authorization;
 
-    const timeout = AbortSignal.timeout(options.timeoutMs ?? this.#options.timeoutMs);
-    const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
+    const linked = linkedSignal([options.signal], options.timeoutMs ?? this.#options.timeoutMs);
+    const signal = linked.signal;
+    try {
     let response: Response;
     try {
       response = await (this.#options.fetch ?? fetch)(this.#endpoint, {
@@ -205,6 +207,9 @@ export class HttpMcpTransport implements McpTransport {
     if (message.error)
       throw new ProtocolError(message.error.code ?? 0, cleanServerText(message.error.message));
     return message.result as T;
+    } finally {
+      linked.dispose();
+    }
   }
 
   async #initialize(options: CallOptions): Promise<void> {

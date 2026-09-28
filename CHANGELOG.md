@@ -4,6 +4,9 @@ All notable changes to this repository. Dates are UTC.
 
 ## Unreleased
 
+- Timeouts and cancellation no longer use `AbortSignal.any()`/`AbortSignal.timeout()`: on
+  Node 20 those composite signals can be garbage-collected while pending, so an abort (for
+  example the runtime executor deadline) might never fire.
 - CI: GitHub Actions pinned to commit SHAs (the tag in a comment).
 - Tests run through `scripts/run-tests.mjs`, so `npm test` also works on Windows with Node 20
   (npm does not expand `tests/*.test.ts` there).

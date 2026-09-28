@@ -8,6 +8,7 @@ import {
   fromStreamError,
 } from '../errors.js';
 import { utf8 } from '../internal/bytes.js';
+import { linkedSignal } from '../internal/signals.js';
 import { withRetry, type RetryPolicy, defaultRetryPolicy } from '../retry.js';
 import { Secret, cleanServerText, type Untrusted } from '../secret.js';
 import { parseSse } from '../sse.js';
@@ -121,6 +122,7 @@ export async function enroll(
 ): Promise<{ credential: RuntimeCredential; agent: Untrusted<Record<string, unknown>>; heartbeatSeconds: number; ttlSeconds: number }> {
   const base = checkOrigin(origin);
   const code = typeof input.enrollmentCode === 'string' ? input.enrollmentCode : input.enrollmentCode.reveal();
+  const linked = linkedSignal([options.signal], 30_000);
   let response: Response;
   try {
     response = await (options.fetch ?? fetch)(new URL('/api/runtime/enroll', base), {
@@ -128,9 +130,10 @@ export async function enroll(
       redirect: 'error',
       headers: { 'content-type': 'application/json', accept: 'application/json' },
       body: JSON.stringify({ agent_id: input.agentId, enrollment_code: code }),
-      signal: options.signal ?? AbortSignal.timeout(30_000),
+      signal: linked.signal,
     });
   } catch (error) {
+    linked.dispose();
     throw new EnrollmentLostError(error);
   }
   let body: Record<string, unknown> | null = null;
@@ -138,6 +141,8 @@ export async function enroll(
     body = JSON.parse(await readCapped(response, RUNTIME_MAX_RESPONSE_BYTES)) as Record<string, unknown>;
   } catch (error) {
     if (response.ok) throw new EnrollmentLostError(error);
+  } finally {
+    linked.dispose();
   }
   if (!response.ok) throw fromHttpError(response.status, body, response.headers);
   if (!body || typeof body.token !== 'string') throw new EnrollmentLostError();
@@ -201,20 +206,24 @@ export class RuntimeClient {
       const bypass = this.#options.protectionBypass;
       if (bypass && new URL(bypass.origin).origin === this.#base.origin)
         headers['x-vercel-protection-bypass'] = bypass.token.reveal();
-      const timeout = AbortSignal.timeout(options.timeoutMs ?? this.#options.timeoutMs ?? 15_000);
+      const linked = linkedSignal([options.signal], options.timeoutMs ?? this.#options.timeoutMs ?? 15_000);
       let response: Response;
+      let text: string;
       try {
         response = await (this.#options.fetch ?? fetch)(new URL(path, this.#base), {
           method,
           headers,
           redirect: 'error',
           ...(method === 'POST' ? { body: raw } : {}),
-          signal: options.signal ? AbortSignal.any([options.signal, timeout]) : timeout,
+          signal: linked.signal,
         });
+        text = await readCapped(response, options.maxBytes ?? RUNTIME_MAX_RESPONSE_BYTES);
       } catch (error) {
+        if (error instanceof TransportError) throw error;
         throw new TransportError('The runtime request did not complete.', error);
+      } finally {
+        linked.dispose();
       }
-      const text = await readCapped(response, options.maxBytes ?? RUNTIME_MAX_RESPONSE_BYTES);
       let parsed: unknown = null;
       try {
         parsed = text ? JSON.parse(text) : null;

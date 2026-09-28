@@ -1,6 +1,7 @@
 // The runtime loop: heartbeats, the job lease loop, and delivery of results and failures.
 import { CentralCityError, TransportError } from '../errors.js';
 import { abortableSleep } from '../retry.js';
+import { linkedSignal } from '../internal/signals.js';
 import { RuntimeClient, type FailureReason, type Job, type RuntimeOptions } from './client.js';
 import type { SequenceStore } from './sequence.js';
 
@@ -49,7 +50,8 @@ export async function runConnector(options: ConnectorOptions): Promise<void> {
   const client = new RuntimeClient(options);
   const sleep = options.sleep ?? abortableSleep;
   const controller = new AbortController();
-  const signal = AbortSignal.any([options.signal, controller.signal]);
+  const linked = linkedSignal([options.signal, controller.signal]);
+  const signal = linked.signal;
   const emit = (event: ConnectorEvent) => options.onEvent?.(event);
   let fatal: unknown;
   const stop = (error: unknown) => {
@@ -140,10 +142,10 @@ export async function runConnector(options: ConnectorOptions): Promise<void> {
       }
       const { job, leaseToken } = claimed;
       emit({ type: 'claimed', jobId: job.id });
-      const deadline = AbortSignal.any([signal, AbortSignal.timeout(options.executionTimeoutMs ?? 35_000)]);
+      const deadline = linkedSignal([signal], options.executionTimeoutMs ?? 35_000);
       let outcome: { output: Record<string, unknown> } | { reason: FailureReason };
       try {
-        outcome = { output: await runWithDeadline(options.execute, job, deadline) };
+        outcome = { output: await runWithDeadline(options.execute, job, deadline.signal) };
       } catch (error) {
         if (signal.aborted) return;
         outcome = {
@@ -154,6 +156,8 @@ export async function runConnector(options: ConnectorOptions): Promise<void> {
                 ? 'execution-timeout'
                 : 'runtime-unavailable',
         };
+      } finally {
+        deadline.dispose();
       }
       if ('output' in outcome) {
         const output = outcome.output;
@@ -182,6 +186,7 @@ export async function runConnector(options: ConnectorOptions): Promise<void> {
     if (fatal && !options.signal.aborted) throw fatal;
   } finally {
     controller.abort();
+    linked.dispose();
     await options.sequenceStore.close?.();
     emit({ type: 'stopped' });
   }
