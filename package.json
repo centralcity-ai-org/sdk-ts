@@ -2,7 +2,7 @@
   "name": "@centralcity/sdk",
   "version": "0.1.0-alpha.5",
   "private": true,
-  "description": "TypeScript SDK for Central City (pre-release; not published).",
+  "description": "TypeScript SDK for Central City (not on npm yet; install from GitHub).",
   "license": "Apache-2.0",
   "type": "module",
   "sideEffects": false,

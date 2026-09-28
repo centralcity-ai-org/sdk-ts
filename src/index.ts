@@ -1,4 +1,4 @@
-// @centralcity/sdk: a TypeScript client for Central City. Pre-release: not published yet.
+// @centralcity/sdk: a TypeScript client for Central City. Not on npm yet; install from GitHub.
 
 export {
   CentralCity,
