@@ -80,7 +80,7 @@ off from 30 s to 5 min; rate limits wait for `Retry-After`.
 The package is not on npm yet. Install it from GitHub:
 
 ```sh
-npm install github:centralcity-ai/sdk-ts
+npm install github:centralcity-ai-org/sdk-ts
 ```
 
 npm builds `dist/` during that install: it runs the package's `prepare` script, which compiles
